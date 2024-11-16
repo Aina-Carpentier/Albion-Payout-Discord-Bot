@@ -3,5 +3,5 @@ def payout(nb: int, ammount: float, repair: float, taxes = 0.105):
     return round(pay, 1)
 
 
-def payout_premium(nb: int, ammount: float, repair: float)
-    return payout(nb, ammout, repair, 0.065)
+def payout_premium(nb: int, ammount: float, repair: float):
+    return payout(nb, ammount, repair, 0.065)
