@@ -110,16 +110,18 @@ async def participant_view(ctx, nb, ammount, repair, members, count, players, pa
                 )
         
         async def callback(interaction):
-            await interaction.response.send_message("Please wait...")
-            await interaction.delete_original_response()
-
             if select.values[0] == "New participant":
+                select.disabled = True
+                select.placeholder = "New participant"
+                await interaction.response.edit_message(view=view)
                 await add_player(ctx)
                 return await participant_view(ctx, nb, ammount, repair, members, count, players, payout)
             
             else:
                 players.append(select.values[0])
                 select.disabled = True
+                select.placeholder = list(filter(lambda x: x.value==select.values[0], select.options))[0].label
+                await interaction.response.edit_message(view=view)
                 return await participant_view(ctx, nb, ammount, repair, members, count + 1, players, payout) 
 
 
@@ -129,8 +131,25 @@ async def participant_view(ctx, nb, ammount, repair, members, count, players, pa
         await ctx.respond(f"Select {misc.ordinal(count)} payout participant :", view = view, ephemeral = True)
 
         
-async def embed_payout(ctx: discord.ApplicationContext, players: list, method, ammout: float, repair: float):
-    await ctx.respond(f"Each players will have {method(len(players), ammout, repair)}k silvers.")
+async def embed_payout(ctx: discord.ApplicationContext, players: list, method, ammount: float, repair: float):
+
+    
+    embed = discord.Embed(title = "Payout" if method == calc.payout else "Payout_Premium", color = 0xFFD700)
+    
+    embed.set_author(name = ctx.guild.get_member(int(players[0])), icon_url = ctx.guild.get_member(int(players[0])).avatar)
+    embed.add_field(inline=True, name = "Estimated value :", value = f"{'{:,}'.format(ammount)}k")
+    embed.add_field(inline=True, name = "Repair costs :", value = f"{'{:,}'.format(repair)}k")
+    embed.add_field(inline=True, name = "Taxes :", value = f"{'{:,}'.format(ammount * (0.105 if method == calc.payout else 0.065))}k")
+    embed.add_field(name = "Results :", value = f"Everyone must receive : {'{:,}'.format(method(len(players), ammount, repair))}k")
+    
+    participants = ""
+    for i in range(1,len(players)):
+        participants += f"📌 <@{players[i]}>\n"
+
+
+    embed.add_field(inline= False, name = "Participants :", value = participants)
+
+    await ctx.respond(embed = embed)
 
 
 
