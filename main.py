@@ -115,6 +115,8 @@ async def participant_view(ctx, nb, ammount, repair, members, count, players, pa
                 select.placeholder = "New participant"
                 await interaction.response.edit_message(view=view)
                 await add_player(ctx)
+                global members
+                members = await getplayers(ctx)
                 return await participant_view(ctx, nb, ammount, repair, members, count, players, payout)
             
             else:
